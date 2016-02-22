@@ -44,7 +44,8 @@ DB[:info_infopage].where(kind: 'page').each do |page|
   front_matter = {
     'title' => page[:title].strip,
     'slug' => page[:slug],
-    'permalink' => "/info/#{page[:slug]}/"
+    'permalink' => "/info/#{page[:slug]}/",
+    'layout' => 'page'
   }
   File.write(File.join(infopages_path, "#{page[:slug]}.md"), content_for(page, front_matter))
 end
