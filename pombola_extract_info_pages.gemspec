@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'pombola_extract_info_pages'
-  s.version     = '1.0.0'
+  s.version     = '1.0.1'
   s.summary     = "Extract infopages from a Pombola database dump"
   s.authors     = ["Chris Mytton"]
   s.email       = 'chrism@mysociety.org'
