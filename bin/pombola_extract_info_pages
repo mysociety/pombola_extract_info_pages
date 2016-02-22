@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+require 'sequel'
+require 'fileutils'
+require 'yaml'
+
+abort "Usage: DATABASE_URL=postgres://localhost/mzalendo-zw #$0" unless ENV['DATABASE_URL']
+
+DB = Sequel.connect(ENV['DATABASE_URL'])
+
+LINK_REGEX = /\[(?<text>.+?)\]\((?<url>.+?)(?: (?<title>".*?"))?\)/
+
+def tidy_markdown(markdown)
+  markdown.tr!("\r\n", "\n")
+  markdown.gsub!(/\n+$/, "\n")
+  markdown.gsub!("\n\n**\n", "**\n")
+  markdown.strip!
+  links = markdown.to_enum(:scan, LINK_REGEX).map { Regexp.last_match }
+  return markdown unless links.any?
+  links.each do |link|
+    if link[:title] == '""'
+      # Get rid of empty title
+      markdown.sub!(link.to_s, "[#{link[:text].strip}](#{link[:url].strip})")
+    end
+    if !link[:url].lstrip.start_with?('/') && !link[:url].lstrip.start_with?('http')
+      # Fix relative links to be absolute
+      markdown.sub!(link.to_s, "[#{link[:text].strip}](/info/#{link[:url].strip})")
+    end
+  end
+  markdown
+end
+
+def content_for(item, front_matter = {})
+  <<CONTENT
+#{YAML.dump(front_matter)}---
+
+#{tidy_markdown(item[:markdown_content])}
+CONTENT
+end
+
+infopages_path = 'info'
+FileUtils.mkdir_p(infopages_path)
+
+DB[:info_infopage].where(kind: 'page').each do |page|
+  front_matter = {
+    'title' => page[:title].strip,
+    'slug' => page[:slug],
+    'permalink' => "/info/#{page[:slug]}/"
+  }
+  File.write(File.join(infopages_path, "#{page[:slug]}.md"), content_for(page, front_matter))
+end
+
+posts_path = '_posts'
+FileUtils.mkdir_p(posts_path)
+
+DB[:info_infopage].exclude(kind: 'page').each do |post|
+  front_matter = {
+    'title' => post[:title].strip,
+    'slug' => post[:slug],
+    'layout' => 'post'
+  }
+  File.write(File.join(posts_path, "#{post[:publication_date].to_date.to_s}-#{post[:slug]}.md"), content_for(post, front_matter))
+end
