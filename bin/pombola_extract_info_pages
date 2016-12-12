@@ -9,23 +9,23 @@ DB = Sequel.connect(ENV['DATABASE_URL'])
 
 LINK_REGEX = /\[(?<text>.+?)\]\((?<url>.+?)(?: (?<title>".*?"))?\)/
 
+def process_link(link_match)
+  text, url, title = link_match.captures
+  # Get rid of empty title
+  title = nil if title == '""'
+  # Fix relative links to be absolute
+  unless url.lstrip.start_with?('/') or url.lstrip.start_with?('http')
+    url = "/info/#{url.strip}"
+  end
+  "[#{text}](#{url}#{title ? ' ' + title : ''})"
+end
+
 def tidy_markdown(markdown)
   markdown.tr!("\r\n", "\n")
   markdown.gsub!(/\n+$/, "\n")
   markdown.gsub!("\n\n**\n", "**\n")
   markdown.strip!
-  links = markdown.to_enum(:scan, LINK_REGEX).map { Regexp.last_match }
-  return markdown unless links.any?
-  links.each do |link|
-    if link[:title] == '""'
-      # Get rid of empty title
-      markdown.sub!(link.to_s, "[#{link[:text].strip}](#{link[:url].strip})")
-    end
-    if !link[:url].lstrip.start_with?('/') && !link[:url].lstrip.start_with?('http')
-      # Fix relative links to be absolute
-      markdown.sub!(link.to_s, "[#{link[:text].strip}](/info/#{link[:url].strip})")
-    end
-  end
+  markdown.gsub!(LINK_REGEX) { |m| process_link Regexp.last_match }
   markdown
 end
 
