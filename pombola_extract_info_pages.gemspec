@@ -10,4 +10,5 @@ Gem::Specification.new do |s|
     'https://github.com/mysociety/pombola_extract_info_pages'
   s.license       = 'MIT'
   s.add_dependency 'sequel', '~> 4.31'
+  s.add_dependency 'pg'
 end
