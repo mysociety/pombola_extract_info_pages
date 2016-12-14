@@ -17,6 +17,9 @@ def process_link(link_match)
   unless url.lstrip.start_with?('/') or url.lstrip.start_with?('http')
     url = "/info/#{url.strip}"
   end
+  # Rewrite a known bad URL:
+  url.gsub!(/jibrin-b rau/, 'jibrin-barau')
+  url.gsub!(%r'^/info/revoda.org.ng', 'http://www.revoda.org.ng/')
   "[#{text}](#{url}#{title ? ' ' + title : ''})"
 end
 
