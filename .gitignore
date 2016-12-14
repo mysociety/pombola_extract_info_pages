@@ -1,2 +1,6 @@
 Gemfile.lock
 *.gem
+/*.csv
+/info
+/media
+/posts
