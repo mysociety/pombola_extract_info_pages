@@ -116,7 +116,7 @@ DB[:info_infopage].where(kind: 'page').each do |page|
   File.write(File.join(infopages_path, "#{page[:slug]}.md"), content_for(page, front_matter))
 end
 
-posts_path = '_posts'
+posts_path = 'posts'
 FileUtils.mkdir_p(posts_path)
 
 DB[:info_infopage].exclude(kind: 'page').each do |post|
