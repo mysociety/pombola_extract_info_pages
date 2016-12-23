@@ -71,7 +71,7 @@ def process_link(link_match)
     path = pombola_path(url)
     if path
       if path =~ %r'^/(file_archive|media_root)/'
-        fetch_file(path)
+        url = fetch_file(path)
       elsif path =~ %r'^/person/(?<person_slug>[-a-zA-Z0-9]+)(?:/(?<person_subpage>.*?)/?)$'
         person_slug, subpage = Regexp.last_match.captures
         $people_slugs_found.add person_slug
