@@ -27,7 +27,6 @@ def fetch_file(path)
   response = request.get(path)
   if response.code == "200"
     path.sub! /(\/)+$/, ''
-    path.sub! /^\/media_root/, ''
     filename = File.join(MEDIA_DIR, path)
     directory_to_make = File.dirname(filename)
     FileUtils.mkdir_p directory_to_make
